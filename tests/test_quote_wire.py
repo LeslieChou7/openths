@@ -66,6 +66,14 @@ class WireTests(unittest.TestCase):
             with self.assertRaises(wire.WireError):
                 wire.snappy(raw)
 
+    def test_unmap_incomplete_final_group(self):
+        # "aaaa" 在自定义字母表中是四个零索引。
+        for body in (b"aaaaa", b"aaaa?\0ignored"):
+            self.assertEqual(wire.unmap_body(body), bytes(3))
+        for body in (b"aaaaa=", b"aaa?a"):
+            with self.assertRaises(wire.WireError):
+                wire.unmap_body(body)
+
     def test_quote_table_identity_and_precision(self):
         keys = [4, 36103, 19]
         width = 16
@@ -81,6 +89,8 @@ class WireTests(unittest.TestCase):
         quote = wire.quote_table(raw, "000001", "33")
         self.assertEqual(quote["turnover"]["display"], "1.20亿")
         self.assertIsNone(quote["latest"])
+        with self.assertRaises(wire.WireError):
+            wire.quote_table(raw, "000001", "17")
         for invalid, code in [
             (raw, "000002"),
             (raw[:-1], "000001"),
@@ -90,6 +100,8 @@ class WireTests(unittest.TestCase):
                 wire.quote_table(invalid, code, "33")
 
     def test_quote_request(self):
+        with self.assertRaises(wire.WireError):
+            wire.quote_body("000001", "99", 2)
         raw = wire.quote_body("000063", "33", 2)
         self.assertIn(b"pageList=2\r\nreqPage=2\r\n", raw)
         self.assertTrue(

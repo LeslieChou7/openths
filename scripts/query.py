@@ -43,6 +43,7 @@ _common = importlib.import_module("_openths.common")
 _hot = importlib.import_module("_openths.hot")
 _events = importlib.import_module("_openths.events")
 _dragon = importlib.import_module("_openths.dragon")
+QUOTE_MARKETS = importlib.import_module("_openths.quote").QUOTE_MARKETS
 QueryFailure = _common.QueryFailure
 unique_object = _common.unique_object
 invalid_number = _common.invalid_number
@@ -203,7 +204,7 @@ def build_parser() -> argparse.ArgumentParser:
             command.add_argument("--pages", type=sector_pages, default=1)
         if name == "quote":
             command.add_argument("--code", required=True, type=stock_code)
-            command.add_argument("--market", required=True, choices=("33",))
+            command.add_argument("--market", required=True, choices=QUOTE_MARKETS)
         if name in ("sector-ranking", "sector-constituents"):
             command.add_argument("--date", type=date.fromisoformat, required=True)
             command.add_argument(
@@ -319,6 +320,7 @@ def capabilities() -> dict[str, Any]:
             *AUCTION_METHODS,
         ],
         "tcp_configuration_required": sorted(TCP_COMMANDS),
+        "quote_markets": QUOTE_MARKETS,
         "ranking_sorts": [
             {
                 "sort": item,

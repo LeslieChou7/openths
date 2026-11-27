@@ -178,7 +178,13 @@ def request_frame(body, *, number, flags, frame_id, app_info, session="", trace=
 def unmap_body(body):
     import base64
 
-    data = body.split(b"\0", 1)[0].split(b"=", 1)[0].replace(b" ", b"+")
+    content, padding, _ = body.split(b"\0", 1)[0].partition(b"=")
+    data = content.replace(b" ", b"+")
+    if len(data) % 4 == 1:
+        if padding:
+            raise WireError("invalid encoded body")
+        # EOF/NUL 前单独一个六位索引无法组成字节，接收端丢弃该末组。
+        data = data[:-1]
     if any(c not in WIRE64 for c in data):
         raise WireError("body alphabet")
     data = data.translate(bytes.maketrans(WIRE64, BASE64))

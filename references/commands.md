@@ -17,7 +17,7 @@ python scripts/query.py ranking --help
 
 ## TCP 查询
 
-`quote`、`ranking`、`market` 必须提供 `--host`、`--port`、`--app-config`、`--app-info`。以下命令使用调用者本地配置，执行会访问真实服务；本次 skill 开发未运行这些命令。
+`quote`、`ranking`、`market` 必须提供 `--host`、`--port`、`--app-config`、`--app-info`。以下命令使用调用者本地配置，执行会访问真实服务。
 
 ```powershell
 python scripts/query.py quote --live --code 000001 --market 33 --host mobi2.123ths.com --port 9528 --app-config local/app-config.txt --app-info G037.09.127.1.32
@@ -25,7 +25,7 @@ python scripts/query.py ranking --live --sort change_rate --direction asc --page
 python scripts/query.py market --live --components breadth limit_counts --host mobi2.123ths.com --port 9528 --app-config local/app-config.txt --app-info G037.09.127.1.32
 ```
 
-- `quote`：`--code` 必须是六位 ASCII 数字字符串，市场当前仅 `33`。真实验证仅 `000001`、`000002`、`000063`；其他可编码代码不代表已验证。
+- `quote` 每次查询一只 A 股。`--code` 传六位 ASCII 数字，保留前导零。`--market` 传沪市 `17`、深市 `33` 或北交所 `151`。例如沪市用 `--code 601326 --market 17`，北交所用 `--code 920679 --market 151`。九项字段保留页面显示精度。[实测样本](scope.md#沪深北-a-股快照)
 - `ranking`：`--sort change_rate` 支持 `--direction desc/asc`，分别涨幅/跌幅；`turnover`、`rapid_change_rate`、`large_order_net_volume`、`main_net_inflow` 仅 `desc`。默认涨幅降序、一页，每页 OpenTHS 固定 24 条。`--pages 1..10` 是本封装的有限请求上限，实际遇无游标提前结束，非服务端总页数限制。输出 `pages` 保留每页元数据，不重排或去重。
 - `market`：默认五组件，可用 `--components breadth limit_counts turnover fund_flow size_comparison` 选非空、不重复子集。`--allow-partial` 才返回部分错误组件，否则失败退出。范围固定 `m8_baseline`；完整五组件通常含六个业务子请求，组件不是独立股票列表。
 

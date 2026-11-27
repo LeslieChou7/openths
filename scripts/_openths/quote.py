@@ -5,11 +5,13 @@ import struct
 
 from .transport import WireError
 
+QUOTE_MARKETS = ("17", "33", "151")
+
 
 def quote_body(stock_code: str, market: str, instance: int) -> bytes:
     if (
         not re.fullmatch(r"[0-9]{6}", stock_code)
-        or market != "33"
+        or market not in QUOTE_MARKETS
         or not 1 <= instance <= 65535
     ):
         raise WireError("quote identity")

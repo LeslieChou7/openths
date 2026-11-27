@@ -87,17 +87,27 @@ class CliTests(unittest.TestCase):
             + struct.pack("<iIiHHHHBB", 2, 0, 0, 28 + len(meta), 13, 1, 0, 12, 0)
             + meta
         )
-        for text in ("000001", "33"):
-            data += text.encode("utf-16le").ljust(12, b"\0") + b"\0"
-        sock = Socket(framed(1, 0x100, 0, 1, b"\0\xff", data))
-        result = self.call(sock, "quote", ["--code", "000001", "--market", "33"])
-        self.assertEqual(result["stock_code"], "000001")
-        self.assertEqual(len(sock.sent), 3)
         wire = query.wire_module()
-        self.assertEqual(
-            wire.unmap_body(wire.packet(sock.sent[-1][13:]).body),
-            b"[frame]\r\nid=2267\r\npageList=\r\n",
-        )
+        for code, market in (("601326", "17"), ("000001", "33"), ("920679", "151")):
+            with self.subTest(code=code, market=market):
+                cells = b"".join(
+                    text.encode("utf-16le").ljust(12, b"\0") + b"\0"
+                    for text in (code, market)
+                )
+                sock = Socket(framed(1, 0x100, 0, 1, b"\0\xff", data + cells))
+                result = self.call(sock, "quote", ["--code", code, "--market", market])
+                self.assertEqual(
+                    (result["stock_code"], result["market"]), (code, market)
+                )
+                self.assertEqual(len(sock.sent), 3)
+                request = wire.unmap_body(wire.packet(sock.sent[1][13:]).body)
+                self.assertIn(
+                    f"stockcode={code}\r\nmarketcode={market}\r\n".encode(), request
+                )
+                self.assertEqual(
+                    wire.unmap_body(wire.packet(sock.sent[-1][13:]).body),
+                    b"[frame]\r\nid=2267\r\npageList=\r\n",
+                )
 
     def test_ranking(self):
         cols = [(4, 12, 0), (36103, 4, 0), (55, 2, 0)]
