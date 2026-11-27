@@ -1,0 +1,4 @@
+interface:
+  display_name: "OpenTHS 同花顺只读数据"
+  short_description: "独立查询行情、排行、概览、热榜及龙虎榜，保留验证边界"
+  default_prompt: "使用 $openths 查询我需要的同花顺只读数据，并说明字段单位、时间和验证范围。"

@@ -1,0 +1,18 @@
+[
+  {
+    "id": "stock_hour",
+    "name": "大家都在看",
+    "time_window_label": "1小时",
+    "scope_description": "App热股/a固定来源；完整证券集合未知",
+    "object_type": "stock",
+    "pagination": "single_response"
+  },
+  {
+    "id": "stock_24h",
+    "name": "大家都在看",
+    "time_window_label": "24小时",
+    "scope_description": "App热股/a固定来源；完整证券集合未知",
+    "object_type": "stock",
+    "pagination": "single_response"
+  }
+]
